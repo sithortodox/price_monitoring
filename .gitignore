@@ -1,0 +1,39 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# --- Node / сборка фронтенда (перед docker build: cd frontend && npm run build) ---
+node_modules/
+frontend/dist/
+
+# --- Секреты и локальные настройки ---
+.env
+.env.*
+!.env.example
+backend/.env
+
+# --- Данные, экспорты, логи ---
+data/
+backend/exports/
+backend/logs/
+*.xlsx
+*.sql
+*.sql.gz
+*.dump
+*.sqlite
+*.sqlite3
+
+# --- Внутренние документы ---
+*.docx
+
+# --- Системное / IDE ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+site_monitoring.tgz

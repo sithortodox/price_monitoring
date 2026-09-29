@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16
+    container_name: site-monitoring-db
+    environment:
+      POSTGRES_USER: monitor
+      POSTGRES_PASSWORD: monitor
+      POSTGRES_DB: site_monitoring
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monitor -d site_monitoring"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: site-monitoring:latest
+    container_name: site-monitoring-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://monitor:monitor@db:5432/site_monitoring
+      SCHEDULER_ENABLED: "${SCHEDULER_ENABLED:-true}"
+      SCHEDULE_HOUR: "${SCHEDULE_HOUR:-21}"
+      SCHEDULE_MINUTE: "${SCHEDULE_MINUTE:-0}"
+      TIMEZONE: "${TIMEZONE:-Europe/Moscow}"
+      HTTP_DELAY_SEC: "${HTTP_DELAY_SEC:-1.0}"
+      MAX_PAGES_PER_SITE: "${MAX_PAGES_PER_SITE:-100}"
+      PROXY_URL: "${PROXY_URL:-}"
+      EXPORT_DIR: /app/backend/exports
+      BROWSER_HEADLESS: "true"
+    volumes:
+      - ./backend/exports:/app/backend/exports
+      - ./data:/app/backend/data
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
